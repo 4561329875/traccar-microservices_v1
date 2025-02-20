@@ -1,0 +1,101 @@
+version: '3.8'
+
+services:
+  user-service:
+    build: ./MSUsuarios
+    container_name: traccar-user-service
+    ports:
+      - "9081:8080"
+    networks:
+      - traccar-network
+    restart: unless-stopped
+
+  device-service:
+    build: ./MSDispositivos
+    container_name: traccar-device-service
+    privileged: true
+    ports:
+      - "9082:8080"
+    environment:
+      PG_DBNAME: db
+      PG_USER: user
+      PG_PASSWORD: example
+      PG_HOST: servBD
+      PG_PORT: 5432
+    volumes:
+      - voldevice:/app/media
+    depends_on:
+       postgres:
+          condition: service_healthy
+    networks:
+      - traccar-network
+    restart: unless-stopped
+
+
+  position-service:
+    build: ./MSPosicion
+    container_name: traccar-position-service
+    ports:
+      - "9083:8080"
+    networks:
+      - traccar-network
+    restart: unless-stopped
+
+  event-service:
+    build: ./MSEventos
+    container_name: traccar-event-service
+    ports:
+      - "9084:8080"
+
+    networks:
+      - traccar-network
+    restart: unless-stopped
+
+  notification-service:
+    build: ./MSNotificaciones
+    container_name: traccar-notification-service
+    ports:
+      - "9085:8080"
+
+    networks:
+      - traccar-network
+    restart: unless-stopped
+
+  report-service:
+    build: ./MSReportes
+    container_name: traccar-report-service
+    ports:
+      - "9086:8080"
+
+    networks:
+      - traccar-network
+    restart: unless-stopped
+
+  postgres:
+    container_name: servBD
+    image: postgres
+    restart: unless-stopped
+    shm_size: 128mb
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_USER: user
+      POSTGRES_DB: db
+      PGDATA: /data/postgres
+    volumes:
+      - pgdatapersonalizada:/data/postgres
+      - ./init-scripts:/docker-entrypoint-initdb.d
+    networks:
+      - traccar-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d db"]
+      interval: 5s
+      timeout: 4s
+      retries: 18
+
+networks:
+  traccar-network:
+    driver: bridge
+
+volumes:
+  pgdatapersonalizada:
+  voldevice:
