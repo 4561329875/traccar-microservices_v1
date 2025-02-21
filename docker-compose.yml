@@ -91,20 +91,6 @@ services:
       interval: 5s
       timeout: 4s
       retries: 18
-    
-  traccar:
-    build: ./TraccarMonolitico
-    container_name: traccar-server
-    volumes:
-      -logstraccar:/opt/traccar/logs:rw
-      -configtraccar:/opt/traccar/conf/traccar.xml:ro
-    ports:
-      - "9982:8082"
-      - "5000-5150:5000-5150"
-      - "5000-5150:5000-5150/udp"
-    networks:
-      - traccar-network
-    restart: unless-stopped
 
 networks:
   traccar-network:
@@ -113,5 +99,3 @@ networks:
 volumes:
   pgdatapersonalizada:
   voldevice:
-  logstraccar:
-  configtraccar:./TraccarMonolitico/traccar.xml
