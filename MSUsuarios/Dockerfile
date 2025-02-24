@@ -1,28 +1,60 @@
-# Usa Debian 12 como imagen base
-FROM debian:12
+# 🌟 Fase 1: Compilación (Builder)
+FROM ubuntu:22.04 AS builder
 
-# Actualiza e instala dependencias necesarias
-RUN apt update
-RUN apt install -y \
-    g++ cmake make wget libboost-all-dev libasio-dev \
-    && rm -rf /var/lib/apt/lists/*
+# Evitar prompts interactivos en apt-get
+ENV DEBIAN_FRONTEND=noninteractive
 
-# Descarga e instala Crow desde el archivo .deb
-RUN wget -q https://github.com/CrowCpp/Crow/releases/download/v1.2.0/Crow-1.2.0-Linux.deb
-RUN dpkg -i Crow-1.2.0-Linux.deb
-RUN  rm Crow-1.2.0-Linux.deb
+# Instalar solo las dependencias necesarias para la compilación
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
+    libboost-all-dev \
+    libpqxx-dev \
+    cmake \
+    g++ \
+    git \
+    curl \
+    libssl-dev \
+    libcurl4-openssl-dev \
+    libasio-dev \
+    iputils-ping \
+    ca-certificates && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Crea el directorio de la aplicación
-WORKDIR /app
+# Configurar el buffer de Git para evitar problemas con la red
+RUN git config --global http.postBuffer 524288000
 
-# Copia los archivos del proyecto
-COPY main.cpp CMakeLists.txt ./
+# Descargar e instalar Crow Framework
+RUN git clone https://github.com/CrowCpp/Crow /crow && \
+    cd /crow && \
+    git submodule update --init --recursive && \
+    cmake . && make && make install
 
-# Compila la API
-RUN cmake . && make
+# Configurar directorio de trabajo y copiar código fuente
+WORKDIR /usr/src/app
+COPY . .
 
-# Expone el puerto 8080
+# Compilar el servicio
+RUN g++ -std=c++17 -o user_service main.cpp jwt_funciones.c -lpqxx -lboost_system -lpthread
+
+# 🌟 Fase 2: Ejecución
+FROM ubuntu:22.04
+
+# Instalar solo las dependencias necesarias para la ejecución
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libpqxx-dev \
+    libboost-system-dev \
+    libssl-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Configurar directorio de trabajo
+WORKDIR /usr/src/app
+
+# Copiar el binario desde la fase de compilación
+COPY --from=builder /usr/src/app/user_service .
+
+# Exponer el puerto
 EXPOSE 8080
 
-# Ejecuta el servidor
-CMD ["./MSUsuarios"]
+# Definir comando de inicio
+CMD ["./user_service"]
+
