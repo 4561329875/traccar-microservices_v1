@@ -34,6 +34,11 @@
 
 #include <ctime>
 
+#include <fstream>  // Para manejo de archivos
+#include "benchmark.h"
+
+
+
 #define UPLOAD_FOLDER "/app/media"
 using json = nlohmann::json;
 PGconn *conn ;
@@ -43,6 +48,14 @@ PGconn *conn ;
 
 
 crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
+
+    //iniciar medidor
+    systemMetrics sm("Prueba de rendimiento");
+
+    sm.resetCounters();
+    //
+
+
     bool all = req.url_params.get("all") ? std::string(req.url_params.get("all")) == "true" : false;
     int userId = req.url_params.get("userId") ? std::stoi(req.url_params.get("userId")) : -1;
 
@@ -106,6 +119,29 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
 
         free(json_result);  // Libera la memoria después de usarla
 
+
+        //justo antes de cualquier return gravas los resultas
+        sm.calculate(); // Calcula las métricas después de la ejecución
+
+    // Guardar en CSV
+    std::ofstream file("metrics.csv", std::ios::app); // Abre en modo 'append' para no sobrescribir
+
+    // Si el archivo está vacío, escribe la cabecera
+    if (file.tellp() == 0) {
+        file << "Nombre,Tiempo (s),Tiempo (ms),Memoria Dif (KB),Pico Memoria (KB),Uso CPU (%)\n";
+    }
+
+    // Escribir las métricas en el archivo CSV
+    file << sm.getDurationInSeconds() << ","
+         << sm.getDurationInMiliseconds() << ","
+         << sm.getDifMemoryKb() << ","
+         << sm.getPeakDifMemoryKb() << ","
+         << sm.getCpuPercent() << "\n";
+
+    file.close();
+        //
+
+
         return json_obj;
     }else{                                                         //queri especifico
 
@@ -123,9 +159,51 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
 
         free(json_result);  // Libera la memoria después de usarla
 
+        //justo antes de cualquier return gravas los resultas
+        sm.calculate(); // Calcula las métricas después de la ejecución
+
+    // Guardar en CSV
+    std::ofstream file("metrics.csv", std::ios::app); // Abre en modo 'append' para no sobrescribir
+
+    // Si el archivo está vacío, escribe la cabecera
+    if (file.tellp() == 0) {
+        file << "Nombre,Tiempo (s),Tiempo (ms),Memoria Dif (KB),Pico Memoria (KB),Uso CPU (%)\n";
+    }
+
+    // Escribir las métricas en el archivo CSV
+    file << sm.getDurationInSeconds() << ","
+         << sm.getDurationInMiliseconds() << ","
+         << sm.getDifMemoryKb() << ","
+         << sm.getPeakDifMemoryKb() << ","
+         << sm.getCpuPercent() << "\n";
+
+    file.close();
+        //
+
         return json_obj;
 
     }
+
+    //justo antes de cualquier return gravas los resultas
+        sm.calculate(); // Calcula las métricas después de la ejecución
+
+    // Guardar en CSV
+    std::ofstream file("metrics.csv", std::ios::app); // Abre en modo 'append' para no sobrescribir
+
+    // Si el archivo está vacío, escribe la cabecera
+    if (file.tellp() == 0) {
+        file << "Nombre,Tiempo (s),Tiempo (ms),Memoria Dif (KB),Pico Memoria (KB),Uso CPU (%)\n";
+    }
+
+    // Escribir las métricas en el archivo CSV
+    file << sm.getDurationInSeconds() << ","
+         << sm.getDurationInMiliseconds() << ","
+         << sm.getDifMemoryKb() << ","
+         << sm.getPeakDifMemoryKb() << ","
+         << sm.getCpuPercent() << "\n";
+
+    file.close();
+        //
 
     return crow::json::wvalue("");
 }

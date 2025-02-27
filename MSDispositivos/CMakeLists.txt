@@ -50,7 +50,8 @@ add_executable(MicorsevicioDispocitivosDrivers
     ActualizarAcumuladores.h
     ManejadorDeIMG.c
     ManejadorDeIMG.h
-
+    benchmark.cpp
+    benchmark.h
 
 )
 
