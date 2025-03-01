@@ -119,7 +119,6 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
 
         free(json_result);  // Libera la memoria después de usarla
 
-
         //justo antes de cualquier return gravas los resultas
         sm.calculate(); // Calcula las métricas después de la ejecución
 
@@ -183,7 +182,6 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
         return json_obj;
 
     }
-
     //justo antes de cualquier return gravas los resultas
         sm.calculate(); // Calcula las métricas después de la ejecución
 
@@ -580,6 +578,10 @@ crow::json::wvalue crearConduc(const crow::request& req) {
         {"uniqueId", "uniqueid"},
         {"attributes", "attributes"}
     };
+
+    if(!data.contains("attributes")){
+            parPreMap["attributes"] ="'{}'";
+        }
 
     for (const auto& param : parametersMap) {
 

@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include <libpq-fe.h>
 #include <time.h>
-#include "ObtenerCondiciUniConductores.h"
+#include "ObteDisConUni.h"
 
 
 static void trim_end(char *str) {
