@@ -90,7 +90,7 @@ services:
       test: ["CMD-SHELL", "pg_isready -U user -d db"]
       interval: 5s
       timeout: 4s
-      retries: 18
+      retries: 50
 
 
   traccar:
@@ -105,6 +105,18 @@ services:
       - "5000-5150:5000-5150/udp"
     networks:
       - traccar-network
+    depends_on:
+       postgres:
+          condition: service_healthy
+    restart: unless-stopped
+
+
+  frontend:
+    build: ./traccar-web
+    container_name: frontend
+    ports:
+      - "3000:3000"
+    network_mode: "host"
     restart: unless-stopped
 
 networks:
