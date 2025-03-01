@@ -406,25 +406,29 @@ crow::json::wvalue actualizarDisp(const crow::request& req, int deviceid) {
     for (const auto& param : parametersMap) {
 
 
-
+        std::cout<<param.first<<":"<<data.at(param.first).dump()<<"\n";
         if(data.contains(param.first)){
-            if (data.at(param.first).is_string()) {
-                if (param.first == "lastUpdate") {
-                    // Si el parámetro es 'lastUpdate', formateamos la fecha.
-                    std::string dateStr = data.at(param.first).get<std::string>();
-                    std::string formattedDate = "'"+formatDate(dateStr)+"'";  // Formateamos la fecha.
-                    parPreMap[param.second] = formattedDate;}
-                else{
-                    parPreMap[param.second] = "'"+data.at(param.first).get<std::string>()+"'";}  // Extraer directamente si es string
-            } else if(data.at(param.first).is_object()){ // para los objetos
-                parPreMap[param.second] = "'"+data.at(param.first).dump()+"'";
+        if (data.at(param.first).is_string()) {
+            if (param.first == "lastUpdate") {
+                // Si el parámetro es 'lastUpdate', formateamos la fecha.
+                std::string dateStr = data.at(param.first).get<std::string>();
+                std::string formattedDate = "'"+formatDate(dateStr)+"'";  // Formateamos la fecha.
+                parPreMap[param.second] = formattedDate;}
+            else{
+                parPreMap[param.second] = "'"+data.at(param.first).get<std::string>()+"'";}  // Extraer directamente si es string
+        } else if(data.at(param.first).is_object()){ // para los objetos
+            parPreMap[param.second] = "'"+data.at(param.first).dump()+"'";
+        }
+        else{
+            if((param.first == "groupId"||param.first == "positionId")&& !data.at(param.first).empty() && data.at(param.first).get<int>()==0){
+                parPreMap[param.second] ="NULL";
             }
             else{
-                if((param.first == "groupId"||param.first == "positionId")&& data.at(param.first).get<int>()==0){}
-                else{
-                    parPreMap[param.second] = data.at(param.first).dump();  // Convertir a string si es otro tipo
-                }
-            }}
+            parPreMap[param.second] = data.at(param.first).dump();  // Convertir a string si es otro tipo
+            }
+        }}
+
+
     }
 
     for (const auto& entry : parPreMap) {
@@ -780,46 +784,46 @@ std::string get_mime_type(const std::string& extension) {
 void server(){
     crow::SimpleApp app;
 
-    CROW_ROUTE(app, "/devices").methods(crow::HTTPMethod::GET)([](const crow::request& req) {
+    CROW_ROUTE(app, "/api/devices").methods(crow::HTTPMethod::GET)([](const crow::request& req) {
         return get_devices(req);
     });
 
-    CROW_ROUTE(app, "/devices/<int>").methods(crow::HTTPMethod::GET)([](const crow::request& req, int deviceid) {
+    CROW_ROUTE(app, "/api/devices/<int>").methods(crow::HTTPMethod::GET)([](const crow::request& req, int deviceid) {
         return get_devices_unicos(req,deviceid);
     });
 
 
-    CROW_ROUTE(app, "/devices").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+    CROW_ROUTE(app, "/api/devices").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         return crearDisp(req);
     });
 
-    CROW_ROUTE(app, "/devices/<int>").methods(crow::HTTPMethod::PUT)([](const crow::request& req,int deviceid) {
+    CROW_ROUTE(app, "/api/devices/<int>").methods(crow::HTTPMethod::PUT)([](const crow::request& req,int deviceid) {
         return actualizarDisp(req, deviceid);
     });
 
-    CROW_ROUTE(app, "/devices/<int>").methods(crow::HTTPMethod::DELETE)([](const crow::request& req,int deviceid) {
+    CROW_ROUTE(app, "/api/devices/<int>").methods(crow::HTTPMethod::DELETE)([](const crow::request& req,int deviceid) {
         return elimDisp(req, deviceid);
     });
 
 
 
-    CROW_ROUTE(app, "/drivers").methods(crow::HTTPMethod::GET)([](const crow::request& req) {
+    CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::GET)([](const crow::request& req) {
         return getDrivers(req);
     });
 
-    CROW_ROUTE(app, "/drivers/<int>").methods(crow::HTTPMethod::GET)([](const crow::request& req,int deviceid) {
+    CROW_ROUTE(app, "/api/drivers/<int>").methods(crow::HTTPMethod::GET)([](const crow::request& req,int deviceid) {
         return getDrivers(req, deviceid);
     });
 
-    CROW_ROUTE(app, "/drivers").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
+    CROW_ROUTE(app, "/api/drivers").methods(crow::HTTPMethod::POST)([](const crow::request& req) {
         return crearConduc(req);
     });
 
-    CROW_ROUTE(app, "/drivers/<int>").methods(crow::HTTPMethod::PUT)([](const crow::request& req,int deviceid) {
+    CROW_ROUTE(app, "/api/drivers/<int>").methods(crow::HTTPMethod::PUT)([](const crow::request& req,int deviceid) {
         return actualizarConduc(req, deviceid);
     });
 
-    CROW_ROUTE(app, "/drivers/<int>").methods(crow::HTTPMethod::DELETE)([](const crow::request& req,int deviceid) {
+    CROW_ROUTE(app, "/api/drivers/<int>").methods(crow::HTTPMethod::DELETE)([](const crow::request& req,int deviceid) {
         return eliminarConduc(req, deviceid);
     });
 
@@ -828,12 +832,12 @@ void server(){
 
     //acualizar acumiladores
 
-    CROW_ROUTE(app, "/drivers/<int>/accumulators").methods(crow::HTTPMethod::PUT)([](const crow::request& req,int deviceid) {
+    CROW_ROUTE(app, "/api/drivers/<int>/accumulators").methods(crow::HTTPMethod::PUT)([](const crow::request& req,int deviceid) {
         return actualizarAcumu(req, deviceid);
     });
 
     //Guardar img
-    CROW_ROUTE(app, "/devices/<int>/image").methods(crow::HTTPMethod::POST)([](const crow::request& req, int device_id) {
+    CROW_ROUTE(app, "/api/devices/<int>/image").methods(crow::HTTPMethod::POST)([](const crow::request& req, int device_id) {
         // Get content type from the request header
         auto content_type = req.get_header_value("Content-Type");
 

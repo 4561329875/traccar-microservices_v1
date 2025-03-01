@@ -38,7 +38,7 @@ static void convertirTiempo(const char* input_time, char* output_time) {
 
 
 char* consultarDispositivosConUni(PGconn *conn, char *condicion) {
-    size_t query_len = strlen("SELECT id,attributes,groupid,calendarid,name,uniqueid,status,lastupdate ,positionid,phone, model,contact,category, disabled,expirationtime  FROM tc_devices WHERE ") + strlen(condicion) + 1;
+    size_t query_len = strlen("SELECT id,attributes,groupid,calendarid,name,uniqueid,status,lastupdate ,positionid,phone, model,contact,category, disabled,expirationtime  FROM tc_devices WHERE ") + strlen(condicion) + 5;
     char *query = (char*)malloc(query_len * sizeof(char)); // Reserva memoria
 
     if (query == NULL) {
@@ -69,7 +69,7 @@ char* consultarDispositivosConUni(PGconn *conn, char *condicion) {
     int cols = PQnfields(res);
 
     // Reservar memoria para el JSON (ajusta el tamaño según el número de filas y columnas)
-    char *json = (char*)malloc(1000000 * sizeof(char)); // 1MB de espacio, ajusta según tus necesidades
+    char *json = (char*)malloc(100000 * sizeof(char)); // 1MB de espacio, ajusta según tus necesidades
     if (json == NULL) {
         fprintf(stderr, "Error al asignar memoria para el JSON\n");
         PQclear(res);
@@ -77,7 +77,7 @@ char* consultarDispositivosConUni(PGconn *conn, char *condicion) {
     }
 
     // Iniciar el string JSON
-    snprintf(json, 1000000, "");
+    snprintf(json, 100000, "");
 
     const char *nomObjJson[] = {
         "id",

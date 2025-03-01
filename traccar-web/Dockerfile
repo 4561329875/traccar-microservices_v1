@@ -1,21 +1,30 @@
- 
-# Usa una imagen base con Node.js
-FROM node:20-alpine
+# Etapa de construcción
+FROM node:20-alpine AS build
 
-# Establece el directorio de trabajo dentro del contenedor
 WORKDIR /app
 
-# Copia los archivos del proyecto al contenedor
-COPY package.json ./
-
-# Instala las dependencias
+# Copia los archivos de dependencias
+COPY package.json package-lock.json ./
 RUN npm install
 
-# Copia el resto del código
+# Copia el código fuente
 COPY . ./
 
-# Expone el puerto en el que corre la aplicación (ajústalo según tu proyecto)
+# Realiza el build
+RUN npm run build
+
+# Etapa de producción: Servir los archivos estáticos
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Instala 'serve' globalmente
+RUN npm install -g http-server
+# Copia los archivos generados desde la etapa anterior
+COPY --from=build /app/build /app/build
+
+# Expone el puerto 3000 por defecto (puede ser modificado mediante variable de entorno)
 EXPOSE 3000
 
-# Comando para iniciar la aplicación
-CMD ["npm", "start"]
+# Comando para iniciar 'serve', usando la variable de entorno PORT si está definida
+CMD ["http-server", "build", "-p", "3000", "--verbose"]

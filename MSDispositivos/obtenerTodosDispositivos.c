@@ -4,7 +4,7 @@
 #include <libpq-fe.h>
 #include <string.h>
 #include <time.h>
-#define BUFFER_SIZE 100000000
+#define BUFFER_SIZE 1000000000
 
 static void trim_end(char *str) {
     int length = strlen(str);
@@ -48,6 +48,7 @@ char* consultarDispositivos(PGconn *conn) {
         PQclear(res);
         return NULL;
     }
+     free(query);
 
     // Obtener el número de filas y columnas
     int rows = PQntuples(res);

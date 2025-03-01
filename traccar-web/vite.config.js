@@ -11,14 +11,29 @@ export default defineConfig(() => ({
     proxy: {
 
       '/api/socket': 'ws://localhost:9982',
- '/api/devices': 'http://localhost:9082',
-'/api/drivers': 'http://localhost:9082',
+      '/api/devices': 'http://localhost:9082',
+      '/api/drivers': 'http://localhost:9082',
 
-     '/media': 'http://localhost:9082',
+      '/media': 'http://localhost:9082',
       '/api': 'http://localhost:9982'
 
     },
   },
+  preview:{
+    host: '0.0.0.0',
+    port: 3000,
+    proxy: {
+
+      '/api/socket': 'ws://localhost:9982',
+      '/api/devices': 'http://localhost:9082',
+      '/api/drivers': 'http://localhost:9082',
+
+      '/media': 'http://localhost:9082',
+      '/api': 'http://localhost:9982'
+
+    },
+
+  }
   build: {
     outDir: 'build',
   },

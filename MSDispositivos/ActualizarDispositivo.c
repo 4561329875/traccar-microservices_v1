@@ -47,7 +47,7 @@ static void convertirTiempo(const char* input_time, char* output_time) {
 
 char* actuaDisp(PGconn *conn, char *parametrosYvalores, char *selecion) {
 
-    size_t query_len = strlen("UPDATE tc_devices SET ") + strlen(parametrosYvalores) + strlen(" WHERE ") + strlen(selecion) + strlen(" RETURNING id") + 1;
+    size_t query_len = strlen("UPDATE tc_devices SET ") + strlen(parametrosYvalores) + strlen(" WHERE ") + strlen(selecion) + strlen(" RETURNING id") + 5;
     char *query = (char*)malloc(query_len * sizeof(char)); // Reserva memoria
 
     if (query == NULL) {
@@ -72,7 +72,7 @@ char* actuaDisp(PGconn *conn, char *parametrosYvalores, char *selecion) {
         PQclear(res);
         return NULL;
     }
-
+    free(query);
 
     // Obtener el valor del id desde la primera fila y primera columna
     const char *id = PQgetvalue(res, 0, 0);  // 0, 0 porque estamos esperando un solo valor
@@ -85,11 +85,13 @@ char* actuaDisp(PGconn *conn, char *parametrosYvalores, char *selecion) {
 
 
 
-    // Reservar memoria para la cadena final
-    char sec[100];  // Ajusta el tamaño según sea necesario
+    size_t len = snprintf(NULL, 0, "id=%s", id_str) + 5;  // +1 para el terminador nulo
 
-    // Inicializa la cadena con "("
-    snprintf(sec, sizeof(sec), "id=%s", id_str);
+    // Reservar memoria para la cadena final con el tamaño calculado
+    char *sec = (char *)malloc(len);
+
+    // Formatear la cadena final
+    snprintf(sec, len, "id=%s", id_str);
 
 
     return consultarDispositivosConUni(conn,sec); // Devolver el JSON generado
