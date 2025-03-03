@@ -37,6 +37,8 @@
 #include <fstream>  // Para manejo de archivos
 #include "benchmark.h"
 
+#include "metrics_logger.h"
+
 
 
 #define UPLOAD_FOLDER "/app/media"
@@ -123,22 +125,14 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
         sm.calculate(); // Calcula las métricas después de la ejecución
 
     // Guardar en CSV
-    std::ofstream file("metrics.csv", std::ios::app); // Abre en modo 'append' para no sobrescribir
-
-    // Si el archivo está vacío, escribe la cabecera
-    if (file.tellp() == 0) {
-        file << "Nombre,Tiempo (s),Tiempo (ms),Memoria Dif (KB),Pico Memoria (KB),Uso CPU (%)\n";
-    }
-
-    // Escribir las métricas en el archivo CSV
-    file << sm.getDurationInSeconds() << ","
-         << sm.getDurationInMiliseconds() << ","
-         << sm.getDifMemoryKb() << ","
-         << sm.getPeakDifMemoryKb() << ","
-         << sm.getCpuPercent() << "\n";
-
-    file.close();
-        //
+        MetricsLogger::getInstance()->logMetrics(
+        "/api/devices",
+        sm.getDurationInSeconds(),
+        sm.getDurationInMiliseconds(),
+        sm.getDifMemoryKb(),
+        sm.getPeakDifMemoryKb(),
+        sm.getCpuPercent()
+        );
 
 
         return json_obj;
@@ -162,22 +156,14 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
         sm.calculate(); // Calcula las métricas después de la ejecución
 
     // Guardar en CSV
-    std::ofstream file("metrics.csv", std::ios::app); // Abre en modo 'append' para no sobrescribir
-
-    // Si el archivo está vacío, escribe la cabecera
-    if (file.tellp() == 0) {
-        file << "Nombre,Tiempo (s),Tiempo (ms),Memoria Dif (KB),Pico Memoria (KB),Uso CPU (%)\n";
-    }
-
-    // Escribir las métricas en el archivo CSV
-    file << sm.getDurationInSeconds() << ","
-         << sm.getDurationInMiliseconds() << ","
-         << sm.getDifMemoryKb() << ","
-         << sm.getPeakDifMemoryKb() << ","
-         << sm.getCpuPercent() << "\n";
-
-    file.close();
-        //
+        MetricsLogger::getInstance()->logMetrics(
+        "/api/devices",
+        sm.getDurationInSeconds(),
+        sm.getDurationInMiliseconds(),
+        sm.getDifMemoryKb(),
+        sm.getPeakDifMemoryKb(),
+        sm.getCpuPercent()
+        );
 
         return json_obj;
 
@@ -186,23 +172,14 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
         sm.calculate(); // Calcula las métricas después de la ejecución
 
     // Guardar en CSV
-    std::ofstream file("metrics.csv", std::ios::app); // Abre en modo 'append' para no sobrescribir
-
-    // Si el archivo está vacío, escribe la cabecera
-    if (file.tellp() == 0) {
-        file << "Nombre,Tiempo (s),Tiempo (ms),Memoria Dif (KB),Pico Memoria (KB),Uso CPU (%)\n";
-    }
-
-    // Escribir las métricas en el archivo CSV
-    file << sm.getDurationInSeconds() << ","
-         << sm.getDurationInMiliseconds() << ","
-         << sm.getDifMemoryKb() << ","
-         << sm.getPeakDifMemoryKb() << ","
-         << sm.getCpuPercent() << "\n";
-
-    file.close();
-        //
-
+    MetricsLogger::getInstance()->logMetrics(
+        "/api/devices",
+        sm.getDurationInSeconds(),
+        sm.getDurationInMiliseconds(),
+        sm.getDifMemoryKb(),
+        sm.getPeakDifMemoryKb(),
+        sm.getCpuPercent()
+        );
     return crow::json::wvalue("");
 }
 
@@ -855,14 +832,14 @@ void server(){
         std::vector<uint8_t> image_data(req.body.begin(), req.body.end());
 
         // Generate the filename using the device ID
-        std::string filename = "device_" + std::to_string(device_id) + extension;
+        std::string filename = "device" + extension;
 
         // Use the device ID as the subfolder name for saving the image
         std::string subfolder = std::to_string(device_id);
 
         // Call save_image from the upload.h, passing the subfolder, filename, and image data
-        if (save_image(subfolder.c_str(), filename.c_str(), image_data.data(), image_data.size())) {
-            return crow::response(200, "Image saved as " + filename);
+        if (save_image(conn,subfolder.c_str(), filename.c_str(), image_data.data(), image_data.size())) {
+            return crow::response(200,  filename);
         } else {
             return crow::response(500, "Failed to save image");
         }
@@ -872,7 +849,7 @@ void server(){
 
 
 
-    CROW_ROUTE(app, "/media/<string>/<string>")
+    CROW_ROUTE(app, "/api/media/<string>/<string>")
         .methods(crow::HTTPMethod::GET)([](const crow::request&, std::string subfolder, std::string filename) {
 
             // Construct the full file path
@@ -912,7 +889,10 @@ void server(){
 
 
 int main() {
+
     conn= conectarDB();
     server();
+    MetricsLogger::getInstance()->close();
+    MetricsLogger::getInstance()-> cleanup();
 
 }

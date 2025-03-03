@@ -14,7 +14,7 @@ export default defineConfig(() => ({
       '/api/devices': 'http://localhost:9082',
       '/api/drivers': 'http://localhost:9082',
 
-      '/media': 'http://localhost:9082',
+      '/api/media': 'http://localhost:9082',
       '/api': 'http://localhost:9982'
 
     },
@@ -28,7 +28,7 @@ export default defineConfig(() => ({
       '/api/devices': 'http://localhost:9082',
       '/api/drivers': 'http://localhost:9082',
 
-      '/media': 'http://localhost:9082',
+      '/api/media': 'http://localhost:9082',
       '/api': 'http://localhost:9982'
 
     },

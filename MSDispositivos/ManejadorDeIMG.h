@@ -16,7 +16,7 @@ extern "C" {
 #endif
 
 const char* get_extension(const char *content_type) ;
-int save_image(const char *subfolder, const char *filename, const unsigned char *data, size_t size);
+int save_image(PGconn *conn,const char *IdDispocitivo, const char *filename, const unsigned char *data, size_t size);
 
 #ifdef __cplusplus
 }

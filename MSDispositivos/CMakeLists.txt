@@ -53,6 +53,8 @@ add_executable(MicorsevicioDispocitivosDrivers
     benchmark.cpp
     benchmark.h
 
+    metrics_logger.h
+    metrics_logger.cpp
 )
 
 target_link_libraries(MicorsevicioDispocitivosDrivers ${PostgreSQL_LIBRARIES})

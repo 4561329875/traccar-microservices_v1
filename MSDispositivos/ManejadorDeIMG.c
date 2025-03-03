@@ -1,3 +1,7 @@
+
+#include <libpq-fe.h>
+#include <string.h>
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -18,10 +22,44 @@ void create_upload_folder(const char *subfolder) {
     }
 }
 
-int save_image(const char *subfolder, const char *filename, const unsigned char *data, size_t size) {
+int save_image(PGconn *conn,const char *IdDispocitivo, const char *filename, const unsigned char *data, size_t size) {
     if (size > IMAGE_SIZE_LIMIT) {
         return 0; // Image too large
     }
+
+    const char *plantilla ="SELECT uniqueid FROM tc_devices WHERE id=";
+    size_t query_len = strlen(plantilla) + strlen(IdDispocitivo) + 5;
+    char *query = (char*)malloc(query_len * sizeof(char)); // Reserva memoria
+
+    if (query == NULL) {
+        fprintf(stderr, "Error al reservar memoria para la consulta.\n");
+        return NULL;
+    }
+
+    // Inicializa query con la cadena básica
+    strcpy(query, plantilla);
+
+    // Concatenar la condición de forma segura
+    strncat(query, IdDispocitivo, query_len - strlen(query) - 1);
+
+    PGresult *res = PQexec(conn, query);
+
+
+    // Verificar si la consulta fue exitosa
+    if (PQresultStatus(res) != PGRES_TUPLES_OK) {
+        fprintf(stderr, "Consulta fallida: %s", PQerrorMessage(conn));
+        PQclear(res);
+        return NULL;
+    }
+
+    int rows = PQntuples(res);
+    if (rows == 0) {
+        fprintf(stderr, "No se encontraron resultados.\n");
+        PQclear(res);
+        return NULL;
+    }
+
+    char *subfolder = strdup(PQgetvalue(res, 0, 0));
 
     // Create the subfolder before saving the image
     create_upload_folder(subfolder);
