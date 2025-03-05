@@ -41,16 +41,29 @@ char* consultarDispositivosConUni(PGconn *conn, char *condicion) {
     
  
     char *json = NULL;
-
+    char *temp ;
     const char *nomObjJson[] = {
         "id", "attributes", "groupId", "calendarId", "name", "uniqueId",
         "status", "lastUpdate", "positionId", "phone", "model", "contact",
         "category", "disabled", "expirationTime"
     };
+
     asprintf(&json, "{");
-    json = generarJSONDispositivo(res, rows, cols, nomObjJson, &json);
-    char *temp = json;
-    asprintf(&json, "%s}", row_json);
+
+    for (int j = 0; j < cols; j++)
+        {
+            procesarColumna(res, 0, j, nomObjJson, &json);
+
+            // Si no es la última columna, agregar coma
+            if (j < cols - 1)
+            {
+                temp = json;
+                asprintf(&json, "%s, ", json);
+                free(temp);
+            }
+        }
+    temp = json;
+    asprintf(&json, "%s}", json);
     free(temp);
     PQclear(res);
     return json;

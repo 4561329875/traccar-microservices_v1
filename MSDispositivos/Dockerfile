@@ -20,6 +20,7 @@ RUN  rm Crow-1.2.0-Linux.deb
 
 RUN rm -rf /var/lib/apt/lists/*
 
+
 # Crea el directorio de la aplicación
 WORKDIR /app
 

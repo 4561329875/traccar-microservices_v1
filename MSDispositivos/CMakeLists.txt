@@ -1,10 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
 
-
-
-
-
-
 set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -52,10 +47,8 @@ add_executable(MicorsevicioDispocitivosDrivers
     ManejadorDeIMG.h
     benchmark.cpp
     benchmark.h
-
     metrics_logger.h
     metrics_logger.cpp
-
     ConversorJSONDispositivos.c
     ConversorJSONDispositivos.h
     

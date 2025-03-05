@@ -39,7 +39,7 @@ static void convertirTiempo(const char *input_time, char *output_time)
     sprintf(output_time + strlen(output_time), ".%03d+00:00", milliseconds);
 }
 
- void procesarColumna(PGresult *res, int i, int j, const char *nomObjJson[], char **row_json)
+ void procesarColumna(PGresult *res,const int i,const int j, const char *nomObjJson[], char **row_json)
 {
     const char *colname = PQfname(res, j); // Nombre de la columna
     char *value = PQgetvalue(res, i, j);   // Valor de la celda
