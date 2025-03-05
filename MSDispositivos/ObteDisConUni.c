@@ -48,7 +48,7 @@ char* consultarDispositivosConUni(PGconn *conn, char *condicion) {
         "category", "disabled", "expirationTime"
     };
 
-    asprintf(&json, "{");
+    asprintf(&json, "");
 
     for (int j = 0; j < cols; j++)
         {
@@ -63,7 +63,7 @@ char* consultarDispositivosConUni(PGconn *conn, char *condicion) {
             }
         }
     temp = json;
-    asprintf(&json, "%s}", json);
+    asprintf(&json, "%s", json);
     free(temp);
     PQclear(res);
     return json;
