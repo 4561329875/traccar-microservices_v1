@@ -55,6 +55,10 @@ add_executable(MicorsevicioDispocitivosDrivers
 
     metrics_logger.h
     metrics_logger.cpp
+
+    ConversorJSONDispositivos.c
+    ConversorJSONDispositivos.h
+    
 )
 
 target_link_libraries(MicorsevicioDispocitivosDrivers ${PostgreSQL_LIBRARIES})
