@@ -1,28 +1,63 @@
-# Usa Debian 12 como imagen base
-FROM debian:12
+# -----------------------------------------
+# Etapa 1: Compilación
+# -----------------------------------------
+FROM ubuntu:22.04 AS builder
 
-# Actualiza e instala dependencias necesarias
-RUN apt update
-RUN apt install -y \
-    g++ cmake make wget libboost-all-dev libasio-dev \
+# Instalar dependencias necesarias para compilar C++ y CMake
+RUN apt-get update && apt-get install -y \
+    cmake \
+    g++ \
+    make \
+    libpq-dev \
+    libpqxx-dev \
+    git \
+    uuid-dev \
+    zlib1g-dev \
+    libssl-dev \
+    libjsoncpp-dev \
     && rm -rf /var/lib/apt/lists/*
 
-# Descarga e instala Crow desde el archivo .deb
-RUN wget -q https://github.com/CrowCpp/Crow/releases/download/v1.2.0/Crow-1.2.0-Linux.deb
-RUN dpkg -i Crow-1.2.0-Linux.deb
-RUN  rm Crow-1.2.0-Linux.deb
+# Instalar Drogon
+RUN git clone --branch v1.8.2 --depth 1 https://github.com/drogonframework/drogon.git /tmp/drogon && \
+    cd /tmp/drogon && \
+    git submodule update --init --recursive && \
+    mkdir build && cd build && \
+    cmake .. && make -j$(nproc) && make install && \
+    cd / && rm -rf /tmp/drogon
 
-# Crea el directorio de la aplicación
+# Crear directorio de la aplicación
 WORKDIR /app
 
-# Copia los archivos del proyecto
-COPY main.cpp CMakeLists.txt ./
+# Copiar archivos del proyecto al contenedor
+COPY . /app
 
-# Compila la API
-RUN cmake . && make
+# Crear directorio de compilación y compilar
+RUN rm -rf build && \
+    mkdir -p build && \
+    cmake -B build -S . -DCMAKE_PREFIX_PATH=/usr/local/lib/cmake && \
+    cmake --build build
 
-# Expone el puerto 8080
+# -----------------------------------------
+# Etapa 2: Ejecución
+# -----------------------------------------
+FROM ubuntu:22.04 AS runner
+
+# Instalar solo las dependencias necesarias para la ejecución
+RUN apt-get update && apt-get install -y \
+    libpq-dev \
+    libpqxx-dev \
+    libssl-dev \
+    libjsoncpp-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Crear directorio de la aplicación
+WORKDIR /app
+
+# Copiar el binario compilado desde la etapa de compilación
+COPY --from=builder /app/build/microservice-positions /app/microservice-positions
+
+# Exponer el puerto en el que corre el servicio
 EXPOSE 8080
 
-# Ejecuta el servidor
-CMD ["./MSPosicion"]
+# Definir el comando de ejecución del contenedor
+CMD ["/app/microservice-positions"]
