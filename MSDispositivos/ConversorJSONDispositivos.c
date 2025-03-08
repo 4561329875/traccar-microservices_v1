@@ -4,6 +4,7 @@
 #include <libpq-fe.h>
 #include <string.h>
 #include <time.h>
+#include <omp.h>
 
 static void trim_end(char *str)
 {
@@ -119,9 +120,17 @@ char *generarJSONDispositivo(PGresult *res, int rows, int cols, const char *nomO
     char *tempJson = NULL; // Variable temporal para poder liberar la memoria de json
     asprintf(&json, "[");
 
+    char **rows_json = malloc(rows * sizeof(char *));
+
     // Recorrer las filas
+    #pragma omp parallel for //schedule(static, 1)  un ciclo por hilo
     for (int i = 0; i < rows; i++)
     {
+        //Para verificar el paralelismo
+        int thread_id = omp_get_thread_num();
+        printf("Thread %d processing index %d\n", thread_id, i);
+
+
         char *row_json = NULL;
         char *temp = NULL; // Variable temporal para poder liberar la memoria de los strings
         asprintf(&row_json, "{");
@@ -144,16 +153,19 @@ char *generarJSONDispositivo(PGresult *res, int rows, int cols, const char *nomO
         temp = row_json;
         asprintf(&row_json, "%s}", row_json);
         free(temp);
+        rows_json[i] = row_json;
 
-        // Agregar fila al JSON
-        tempJson = json;
-        asprintf(&json, "%s%s", json, row_json);
-        free(row_json);
+    }
+
+
+    for (int i = 0; i < rows; i++) {
+        char *tempJson = json;
+        asprintf(&json, "%s%s", json, rows_json[i]);
         free(tempJson);
+        free(rows_json[i]);
 
-        // Si no es la última fila, agregar coma
-        if (i < rows - 1)
-        {
+        // Agregar coma si no es la última fila
+        if (i < rows - 1) {
             tempJson = json;
             asprintf(&json, "%s, ", json);
             free(tempJson);

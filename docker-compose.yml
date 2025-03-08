@@ -17,6 +17,7 @@ services:
     ports:
       - "9082:8080"
     environment:
+      OMP_NUM_THREADS: 4
       PG_DBNAME: db
       PG_USER: user
       PG_PASSWORD: example

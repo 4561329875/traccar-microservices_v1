@@ -37,7 +37,7 @@ FROM debian:12-slim AS runtime
 RUN apt update
 #RUN apt install -y linux-perf   #solo en casos de nesesitar medir rendimiento con perf
 RUN apt install -y --no-install-recommends\
-    libpq-dev postgresql-client &&\
+    libpq-dev postgresql-client libgomp1 &&\
     apt clean && \
     rm -rf /var/lib/apt/lists/*
 WORKDIR /app

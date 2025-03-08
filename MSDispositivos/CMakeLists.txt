@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 find_package(PostgreSQL REQUIRED)
 include_directories(${PostgreSQL_INCLUDE_DIRS})
 find_package(nlohmann_json  REQUIRED)
+find_package(OpenMP REQUIRED)
 
 enable_language(C)
 
@@ -53,10 +54,12 @@ add_executable(MicorsevicioDispocitivosDrivers
     ConversorJSONDispositivos.h
     
 )
-
-target_link_libraries(MicorsevicioDispocitivosDrivers ${PostgreSQL_LIBRARIES})
-target_link_libraries(MicorsevicioDispocitivosDrivers nlohmann_json)
-
+target_link_libraries(MicorsevicioDispocitivosDrivers
+    ${PostgreSQL_LIBRARIES}
+    nlohmann_json
+    OpenMP::OpenMP_C
+    OpenMP::OpenMP_CXX
+)
 include(GNUInstallDirs)
 install(TARGETS MicorsevicioDispocitivosDrivers
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
