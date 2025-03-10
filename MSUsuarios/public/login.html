@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Traccar Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex h-screen">
+    <!-- Sidebar azul -->
+    <div class="w-1/3 bg-blue-900 flex items-center justify-center">
+        <h1 class="text-white text-3xl font-bold">Traccar</h1>
+    </div>
+
+    <!-- Sección de login -->
+    <div class="w-2/3 flex items-center justify-center">
+        <div class="w-96 p-6 shadow-md rounded-lg">
+            <h2 class="text-center text-gray-700 text-xl font-semibold mb-4">Login</h2>
+            
+            <form id="loginForm">
+                <label class="block text-gray-600 mb-2">Email</label>
+                <input type="email" id="email" class="w-full p-2 border rounded mb-4" placeholder="Email *" required>
+
+                <label class="block text-gray-600 mb-2">Password</label>
+                <input type="password" id="password" class="w-full p-2 border rounded mb-4" placeholder="Password *" required>
+
+                <button id="loginButton" class="w-full bg-gray-300 text-gray-500 p-2 rounded cursor-not-allowed" disabled>LOGIN</button>
+            </form>
+
+            <div class="mt-4 text-center">
+                <a href="createUser.html" class="text-green-600 font-semibold">REGISTER</a>
+            </div>
+
+            <div class="mt-4 text-center">
+                <label class="text-gray-600">Language</label>
+                <select class="border p-1 rounded">
+                    <option>English</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <script>
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const loginButton = document.getElementById('loginButton');
+
+    function toggleLoginButton() {
+        if (emailInput.value && passwordInput.value) {
+            loginButton.disabled = false;
+            loginButton.classList.remove('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+            loginButton.classList.add('bg-blue-500', 'text-white', 'cursor-pointer');
+        } else {
+            loginButton.disabled = true;
+            loginButton.classList.remove('bg-blue-500', 'text-white', 'cursor-pointer');
+            loginButton.classList.add('bg-gray-300', 'text-gray-500', 'cursor-not-allowed');
+        }
+    }
+
+    emailInput.addEventListener('input', toggleLoginButton);
+    passwordInput.addEventListener('input', toggleLoginButton);
+
+    document.getElementById('loginForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const email = emailInput.value;
+        const password = passwordInput.value;
+
+        const data = { email, password };
+
+        fetch('/users/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(data)
+        })
+        .then(response => {
+            if (response.ok) {
+                return response.json();
+            } else if (response.status === 401) {
+                // Usuario no encontrado o credenciales incorrectas
+                throw new Error('Usuario no encontrado o credenciales incorrectas.');
+            } else {
+                throw new Error('Error en la petición de login.');
+            }
+        })
+        .then(result => {
+            // Mostrar mensaje de login exitoso con token (o la acción que desees)
+            alert('Login exitoso! Token: ' + result.token);
+            // Puedes redirigir a otra página o actualizar la UI según sea necesario.
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert(error.message);
+            // Si el usuario no está registrado, redirige a la página de registro:
+            window.location.href = 'createUser.html';
+        });
+    });
+</script>
+</body>
+</html>
+

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Traccar Register</title>
+  <style>
+     body {
+
+            margin: 0;
+            font-family: Arial, sans-serif;
+            display: flex;
+            height: 100vh;
+        }
+        .sidebar {
+            width: 30%;
+            background-color: #1e3a8a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .container {
+            width: 70%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .form-container {
+            width: 300px;
+        }
+        h2 {
+            color: #1e3a8a;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        .button {
+            width: 100%;
+            padding: 10px;
+            background-color: #ccc;
+            border: none;
+            border-radius: 5px;
+            color: white;
+            font-weight: bold;
+            cursor: not-allowed;
+        }
+        .button.enabled {
+            background-color: #1e3a8a;
+            cursor: pointer;
+        }
+        .button.enabled:hover {
+
+            background-color: #1a2e6e;
+  </style>
+</head>
+<body>
+  <div class="sidebar">
+        <span>Traccar</span>
+    </div>
+    <div class="container">
+        <div class="form-container">
+            <h2>REGISTER</h2>
+            <form id="registerForm">
+                <input type="text" id="name" placeholder="Name *" required>
+                <input type="email" id="email" placeholder="Email *" required>
+                <input type="password" id="password" placeholder="Password *" required>
+                <button id="registerButton" class="button" disabled>REGISTER</button>
+            </form>
+        </div>
+    </div>
+  <!-- JavaScript embebido -->
+  <script>
+    const nameInput = document.getElementById('name');
+    const emailInput = document.getElementById('email');
+    const passwordInput = document.getElementById('password');
+    const registerButton = document.getElementById('registerButton');
+
+    function toggleRegisterButton() {
+      if (nameInput.value && emailInput.value && passwordInput.value) {
+        registerButton.disabled = false;
+        registerButton.classList.remove('bg-gray-300', 'cursor-not-allowed');
+        registerButton.classList.add('enabled');
+      } else {
+        registerButton.disabled = true;
+        registerButton.classList.remove('enabled');
+        registerButton.classList.add('bg-gray-300', 'cursor-not-allowed');
+      }
+    }
+
+    nameInput.addEventListener('input', toggleRegisterButton);
+    emailInput.addEventListener('input', toggleRegisterButton);
+    passwordInput.addEventListener('input', toggleRegisterButton);
+
+    document.getElementById('registerForm').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      const data = {
+        username: nameInput.value,
+        email: emailInput.value,
+        password: passwordInput.value
+      };
+
+      fetch('/users/create', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+      })
+      .then(response => response.text())
+      .then(result => {
+        console.log(result);
+        // Redirigir o manejar la respuesta
+        window.location.href = 'login.html';
+      })
+      .catch(error => console.error('Error:', error));
+      
+    });
+  </script>
+</body>
+</html>
+
