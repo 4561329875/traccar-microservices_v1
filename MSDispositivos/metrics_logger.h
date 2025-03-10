@@ -18,8 +18,7 @@ private:
 
 public:
     static MetricsLogger* getInstance();
-    void logMetrics(const std::string& name, double timeSeconds, double timeMs,
-                    long memoryKb, long peakMemoryKb, double cpuPercent);
+    void logMetrics(const std::string& name, double timeMs);
     void close();
     static void cleanup() {
         if (instance) {

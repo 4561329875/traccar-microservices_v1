@@ -51,11 +51,9 @@ PGconn *conn ;
 
 crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
 
-    //iniciar medidor
-    systemMetrics sm("Prueba de rendimiento");
+    auto inicio = std::chrono::high_resolution_clock::now();
 
-    sm.resetCounters();
-    //
+
 
 
     bool all = req.url_params.get("all") ? std::string(req.url_params.get("all")) == "true" : false;
@@ -121,17 +119,14 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
 
         free(json_result);  // Libera la memoria después de usarla
 
-        //justo antes de cualquier return gravas los resultas
-        sm.calculate(); // Calcula las métricas después de la ejecución
 
-    // Guardar en CSV
+
+        auto fin = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> duracion = fin - inicio;
+
         MetricsLogger::getInstance()->logMetrics(
         "/api/devices",
-        sm.getDurationInSeconds(),
-        sm.getDurationInMiliseconds(),
-        sm.getDifMemoryKb(),
-        sm.getPeakDifMemoryKb(),
-        sm.getCpuPercent()
+        duracion.count()
         );
 
 
@@ -152,33 +147,24 @@ crow::json::wvalue get_devices(const crow::request& req, int path_id = -1) {
 
         free(json_result);  // Libera la memoria después de usarla
 
-        //justo antes de cualquier return gravas los resultas
-        sm.calculate(); // Calcula las métricas después de la ejecución
 
-    // Guardar en CSV
+        auto fin = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> duracion = fin - inicio;
+
         MetricsLogger::getInstance()->logMetrics(
         "/api/devices",
-        sm.getDurationInSeconds(),
-        sm.getDurationInMiliseconds(),
-        sm.getDifMemoryKb(),
-        sm.getPeakDifMemoryKb(),
-        sm.getCpuPercent()
+        duracion.count()
         );
 
         return json_obj;
 
     }
-    //justo antes de cualquier return gravas los resultas
-        sm.calculate(); // Calcula las métricas después de la ejecución
+    auto fin = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double, std::milli> duracion = fin - inicio;
 
-    // Guardar en CSV
-    MetricsLogger::getInstance()->logMetrics(
+        MetricsLogger::getInstance()->logMetrics(
         "/api/devices",
-        sm.getDurationInSeconds(),
-        sm.getDurationInMiliseconds(),
-        sm.getDifMemoryKb(),
-        sm.getPeakDifMemoryKb(),
-        sm.getCpuPercent()
+        duracion.count()
         );
     return crow::json::wvalue("");
 }

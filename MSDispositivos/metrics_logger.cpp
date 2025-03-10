@@ -3,6 +3,9 @@
 
 MetricsLogger* MetricsLogger::instance = nullptr;
 std::mutex MetricsLogger::mutex;
+int writeCount = 0;
+const int FLUSH_THRESHOLD = 10;
+
 
 MetricsLogger::MetricsLogger() {
     file.open("metrics.csv", std::ios::app);
@@ -10,7 +13,7 @@ MetricsLogger::MetricsLogger() {
     // Verificar si el archivo está vacío para escribir la cabecera
     headerWritten = (file.tellp() > 0);
     if (!headerWritten && file.is_open()) {
-        file << "Nombre,Tiempo (s),Tiempo (ms),Memoria Dif (KB),Pico Memoria (KB),Uso CPU (%)\n";
+        file << "Nombre,Tiempo (ms)\n";
         headerWritten = true;
     }
 }
@@ -29,17 +32,18 @@ MetricsLogger* MetricsLogger::getInstance() {
     return instance;
 }
 
-void MetricsLogger::logMetrics(const std::string& name, double timeSeconds, double timeMs,
-                              long memoryKb, long peakMemoryKb, double cpuPercent) {
+void MetricsLogger::logMetrics(const std::string& name, double timeMs) {
     std::lock_guard<std::mutex> lock(mutex);
     if (file.is_open()) {
         file << name << ","
-             << timeSeconds << ","
-             << timeMs << ","
-             << memoryKb << ","
-             << peakMemoryKb << ","
-             << cpuPercent << "\n";
-        file.flush(); // Asegurarse de que los datos se escriban en el archivo
+             << timeMs <<  "\n";
+        //file.flush(); // Asegurarse de que los datos se escriban en el archivo
+
+        writeCount++;
+            if (writeCount >= FLUSH_THRESHOLD) {
+                file.flush();
+                writeCount = 0;
+            }
     }
 }
 
