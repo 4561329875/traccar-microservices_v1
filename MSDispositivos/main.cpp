@@ -367,8 +367,9 @@ crow::json::wvalue actualizarDisp(const crow::request& req, int deviceid) {
     for (const auto& param : parametersMap) {
 
 
-        std::cout<<param.first<<":"<<data.at(param.first).dump()<<"\n";
+
         if(data.contains(param.first)){
+        std::cout<<param.first<<":"<<data.at(param.first).dump()<<"\n";
         if (data.at(param.first).is_string()) {
             if (param.first == "lastUpdate") {
                 // Si el parámetro es 'lastUpdate', formateamos la fecha.
